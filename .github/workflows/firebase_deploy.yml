@@ -1,0 +1,31 @@
+name: Firebase Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  firebase_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Copy directory contents 
+        run: rsync -av --delete QuirkyChatBot/src/ QuirkyChatBot/functions/
+
+      - name: Run additional commands in functions directory
+        working-directory: QuirkyChatBot/functions
+        run: |
+          # Install dependencies if necessary
+          npm install
+          # Deploy our commands
+          node deployCommands.js
+
+      - name: Navigate to QuirkyChatBot directory
+        run: cd QuirkyChatBot
+
+      - name: Run Firebase deploy
+        run: firebase deploy --token ${{ secrets.FIREBASE_TOKEN }} --force
